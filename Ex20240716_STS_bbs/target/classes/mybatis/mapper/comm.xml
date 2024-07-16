@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="comment">
+	
+	<!-- 원글의 기본키를 인자로 받아서 해당 댓글들을 반환하는 기능 -->
+	<select id="comment_list" resultType="mybatis.vo.CommentVO" parameterType="String">
+		SELECT *
+		FROM comment_t
+		WHERE b_idx = #{b_idx}
+	</select>
+
+	<insert id="addComm" parameterType="Map">
+		INSERT INTO comment_t( writer, content, pwd, write_date, ip, b_idx)
+		VALUES(#{writer}, #{content}, #{pwd},NOW(), #{ip}, #{b_idx});
+	</insert>
+
+</mapper>
