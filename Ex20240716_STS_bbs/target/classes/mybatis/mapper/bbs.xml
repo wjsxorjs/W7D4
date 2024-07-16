@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bbs">
+	
+	<resultMap type="mybatis.vo.BbsVO" id="map1">
+		<id property="b_idx" column="b_idx"/>
+		<collection	ofType="mybatis.vo.CommentVO"
+						property="c_list"
+						select="comment.comment_list"
+						column="b_idx"/>
+	</resultMap>
+	
+	<!-- 게시물 목록을 만들기 위한 select -->
+	<select id="list" resultMap="map1" parameterType="Map">
+		
+		SELECT *
+		FROM(	SELECT @RN:=@RN+1 AS rnum, a.*
+			FROM(
+				SELECT *
+				FROM bbs_t
+				WHERE status = 0 AND bname = #{bname}
+				ORDER BY b_idx DESC
+			) AS a, (SELECT @RN:=0) AS b) as c
+		WHERE c.rnum BETWEEN #{begin} AND #{end};
+		
+	</select>
+
+	<!-- 해당 게시물의 전체게시물 수를 반환 -->
+	<select id="count" resultType="int" parameterType="String">
+		SELECT COUNT(*)
+		FROM bbs_t
+		WHERE status = 0 AND bname = #{bname}
+	</select>
+
+	<select id="view" resultMap="map1" parameterType="String">
+		SELECT *
+		FROM bbs_t
+		WHERE b_idx = #{b_idx}
+	</select>
+
+	<insert id="add" parameterType="Map">
+		INSERT INTO bbs_t(subject, writer, content, file_name,
+		ori_name, write_date, ip, hit, bname,  status)
+		VALUES(#{subject}, #{writer}, #{content}, #{file_name}, #{ori_name}, NOW(), #{ip}, 0, #{bname} , 0);
+	</insert>
+	
+
+	<!-- 조회수 증가 -->
+	<update id="hitInc" parameterType="String">
+		UPDATE bbs_t
+		SET hit = hit+1
+		WHERE b_idx = #{b_idx}
+	</update>
+	
+	<!-- 원글 수정 -->
+	<update id="edit" parameterType="String">
+		UPDATE bbs_t
+		<trim prefix="SET" suffixOverrides=",">
+			subject = #{subject},
+			content = #{content},
+			<if test="fname != null">
+				file_name = #{fname},
+				ori_name = #{oname}
+			</if>
+		</trim>
+		WHERE b_idx = #{b_idx}
+	</update>
+	
+	<update id="delBbs" parameterType="String">
+		UPDATE bbs_t
+		SET status = 1
+		WHERE b_idx = #{b_idx}
+	</update>
+
+</mapper>
