@@ -2,13 +2,15 @@ package mybatis.vo;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class BbsVO {
 
 	private String rnum, b_idx, subject, writer, content, file_name, ori_name, pwd, write_date, ip, hit, bname, status;
 
 	private List<CommentVO> c_list;
 	
-	
+	private MultipartFile file;
 	
 	public void setRnum(String rnum) {
 		
@@ -125,6 +127,14 @@ public class BbsVO {
 
 	public List<CommentVO> getC_list() {
 		return c_list;
+	}
+
+	public MultipartFile getFile() {
+		return file;
+	}
+
+	public void setFile(MultipartFile file) {
+		this.file = file;
 	}
 	
 	

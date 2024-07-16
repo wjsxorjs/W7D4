@@ -40,7 +40,7 @@
 		WHERE b_idx = #{b_idx}
 	</select>
 
-	<insert id="add" parameterType="Map">
+	<insert id="add" parameterType="mybatis.vo.BbsVO">
 		INSERT INTO bbs_t(subject, writer, content, file_name,
 		ori_name, write_date, ip, hit, bname,  status)
 		VALUES(#{subject}, #{writer}, #{content}, #{file_name}, #{ori_name}, NOW(), #{ip}, 0, #{bname} , 0);

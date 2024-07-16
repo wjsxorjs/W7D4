@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <title>글쓰기(공지사항)</title>
-<link rel="stylesheet" href="css/summernote-lite.css">
+<link rel="stylesheet" href="resources/css/summernote-lite.css">
 <%-- 현재 브라우저는 자신의 위치를 root로 인식하므로 --%>
 <style type="text/css">
 	#bbs table {
@@ -69,16 +69,16 @@
 
 <body>
 	<div id="bbs">
-	<form action="Controller?type=write" method="post" 
+	<form action="write" method="post" 
 	encType="multipart/form-data"> <%-- form에 파일을 첨부하게 될 때
 										encType을 multipart로 지정 --%>
-		<input type="hidden" name="bname" value="notice"/>
-		<table summary="공지사항 글쓰기">
+		<input type="hidden" name="bname" value="${param.bname }"/>
+		<table summary="게시판 글쓰기">
 			<caption>공지사항 글쓰기</caption>
 			<tbody>
 				<tr>
 					<th>제목:</th>
-					<td><input type="text" name="title" size="45"/></td>
+					<td><input type="text" name="subject" size="45"/></td>
 				</tr>
 				<tr>
 					<th>이름:</th>
@@ -93,19 +93,12 @@
 					<th>첨부파일:</th>
 					<td><input type="file" name="file"/></td>
 				</tr>
-<!--
-				<tr>
-					<th>비밀번호:</th>
-					<td><input type="password" name="pwd" size="12"/></td>
-				</tr>
--->
 				<tr>
 					<td colspan="2">
 						<input type="button" value="보내기"
 						onclick="sendData()"/>
-						<input type="button" value="다시"/>
 						<input type="button" value="목록"
-						onclick="javascript:location.href='Controller?type=list&bname=${param.bname}&cPage=${param.cPage}'"/>
+						onclick="javascript:location.href='list?bname=${param.bname}&cPage=${param.cPage}'"/>
 					</td>
 				</tr>
 			</tbody>
@@ -113,66 +106,42 @@
 	</form>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<script src="js/summernote-lite.js"></script>
-	<script src="js/lang/summernote-ko-KR.js"></script>
+	<script src="resources/js/summernote-lite.js"></script>
 	<script>
-		$(function(){
-			$("#content").summernote({
-				lang: "ko-KR",
-				width: 750,
-				height: 300,
-				maxHeight: 400,
-				minHeight: 200,
-				
-				callbacks:{
-					onImageUpload:function(files, editor){
-						// 이미지가 에디터에 추가될 때마다 수행하는 곳
-						// 이미지를 첨부하면 배열로 인식된다.
-						// 이것을 서버로 비동기식 통신을 수행하면
-						// 서버에 업로드를 시킬 수 있다.
-						for(let i=0; i< files.length; i++){
-							sendImage(files[i], editor);
-							// 이미지를 서버로 보낸다.
-						}
-						
-						
+	$(function(){
+		// 아이디가 content인 요소를 에디터로 표현
+		$("#content").summernote({
+			
+			callbacks:{ // 특정한 사건이 발생했을 때 자동으로 호출되는 함수
+				onImageUpload: function(files, editor){ // 이미지가 에디터에 추가될 때 
+					for(let i=0; i<files.length; i++){
+						sendImage(files[i], editor);
 					}
+					
 				}
-			});
-			
-			$("#content").summernote("lineHeight",0.7);
-			
-			
+			}
 		});
+	});
 		
-		function sendImage(file, editor){
-			// 서버로 파일을 보내기 위해 폼 객체 준비
-			let frm = new FormData();
-			// 보내고자하는 자원을 폼에 파라미터 값으로 등록(추가)
-			frm.append("uploadImg",file); 	// 폼 안에 uploadImg라는 이름으로
-											// 전달하고자 하는 파일이 등록됨
-			frm.append("bname","notice");
-			
-			$.ajax({
-				url:"Controller?type=saveImg",
-				type: "post",
-				data: frm,
-				contentType: false,
-				processData: false,	// 위의 내용을 지정해야 일반적인 데이터 전송이
-									// 아니라 파일이 첨부됨을 증명한다.
-				dataType: "json", // 서버로부터 받는 자원의 자료형
-			}).done(function(res){
-				// 서버로부터 응답이 도착한 경우
-				// 반드시 JSON자료로 받아야 한다.
-				console.log(res.img_url);
-				// let image = $("<img>").attr("src",res.img_url);
-				// $("#content").summernote("insertNode",image[0]);
-				
-				$("#content").summernote(
-				"editor.insertImage", res.img_url);
-				
-			});
-		}
+	function sendImage(file, editor){
+		let ff = new FormData();
+		
+		// 전송하고자 하는 이미지 파일을 파라미터로 설정
+		ff.append("file",file);
+		
+		// 비동기식 통신
+		$.ajax({
+			url:"saveImg",
+			data: ff,
+			type: "post",
+			contentType: false,
+			processData: false,
+			cache: false,
+			dataType: "json",
+		}).done(function(data){
+			$("#content").summernote("editor.insertImage",data.url+"/"+data.fname);
+		});
+	}
 		
 	</script>
 </body>

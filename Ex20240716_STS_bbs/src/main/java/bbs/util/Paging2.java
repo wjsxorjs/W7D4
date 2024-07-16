@@ -47,7 +47,7 @@ public class Paging2 {
 		if(isPrePage) {
 			sb.append("<li><a href='list?bname=");
 			sb.append(bname);
-			sb.append("cPage=");
+			sb.append("&cPage=");
 			sb.append(nowPage - pagePerBlock);
 			sb.append("'>&lt;</a></li>");
 		} else {
